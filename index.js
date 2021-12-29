@@ -3,6 +3,7 @@ const Discord = require("discord.js");
 const fs = require("fs");
 const Fuse = require("fuse.js");
 const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES] });
+require('dotenv').config();
 
 http
   .createServer(function (req, res) {
@@ -267,7 +268,7 @@ client.on("messageCreate", async message => {
   }
 });
 
-client.login("");
+client.login(process.env["TOKEN"]);
 
 function eeval(message) {
   const content = message.content
