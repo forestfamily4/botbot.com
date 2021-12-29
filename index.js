@@ -268,7 +268,7 @@ client.on("messageCreate", async message => {
   }
 });
 
-client.login("OTI0MjgwNzQwMTAxODk0MjE0.YccRhA.KrHL1RyHnxh_KajyLzqbbIA9FdA");
+client.login("");
 
 function eeval(message) {
   const content = message.content
