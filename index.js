@@ -24,7 +24,7 @@ client.on("ready", message => {
   client.user.setPresence({ game: { name: "with discord.js" } });
   console.log("bot is ready!");
   client.user.setActivity("精神崩壊", { type: "PLAYING" });
- // client.channel.cache.get().message.fetch();
+ fs.readFileSync("")
 });
 
 client.on('messageReactionAdd', async (clientmessage, user) => {
@@ -217,7 +217,7 @@ client.on("messageCreate", async message => {
       for(let i=0;i<rollids.length;i++){
        roll_panelmessage.react(emoji[i]);
      }
-     fs.appendFileSync("./rpanel.txt","\n"+roll_panelmessage.id,"utf-8");
+     fs.appendFileSync("./rpanel.txt","\n"+roll_panelmessage.id+"|"+roll_panelmessage.channel.id,"utf-8");
      sousin = true;
     }
     catch (e) {
