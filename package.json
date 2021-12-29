@@ -16,8 +16,7 @@
         "express": "^4.17.2",
         "fs": "^0.0.2",
         "fuse.js": "^6.5.3",
-        "mongodb": "^4.2.2",
-        "querystring": "^0.2.1"
+        "mongodb": "^4.2.2"
     },
     "engines": {
         "node": "16.6"

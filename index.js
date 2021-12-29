@@ -2,15 +2,19 @@ const http = require("http");
 const Discord = require("discord.js");
 const fs = require("fs");
 const Fuse = require("fuse.js");
-const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES] });
+const { json } = require("express/lib/response");
+const express=require("express");
+const client = new Discord.Client({
+  intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES]
+});
 require('dotenv').config();
 
-http
-  .createServer(function (req, res) {
-    res.write("OK");
-    res.end();
-  })
-  .listen(8080);
+const app = express()
+app.listen(8080)
+app.get("/",(req,res)=>{
+	res.sendFile(__dirname + '/views/index.html');
+})
+
 
 const helpjson = JSON.parse(fs.readFileSync("./help.json", "utf8"));
 const tensai =
@@ -24,15 +28,22 @@ client.on("ready", message => {
   client.user.setPresence({ game: { name: "with discord.js" } });
   console.log("bot is ready!");
   client.user.setActivity("精神崩壊", { type: "PLAYING" });
- fs.readFileSync("./rpanel.txt");
+  const rollpanels = fs.readFileSync("./rpanel.txt", "utf-8").split('\n');
+  for (let i = 0; i < rollpanels.length; i++) {
+    const roll_panel_id = rollpanels[i].split('|')[0];
+    const roll_panel_channel = rollpanels[i].split('|')[1];
+    console.log(client.channels.cache.get(roll_panel_channel).messages.fetch(roll_panel_id));
+    
+  }
 });
 
-client.on('messageReactionAdd', async (clientmessage, user) => {
-  
+client.on('messageReactionAdd', async (reaction, user) => {
+  console.log("????");
+  console.log(JSON.stringify(reaction));
 })
 
 client.on("messageCreate", async message => {
-  const prefix=process.env.PREFIX;
+  const prefix = process.env.PREFIX;
   let sousin = false;
   if (message.author.id == "742347739018297346") {
     message.react("🤔");
@@ -51,17 +62,17 @@ client.on("messageCreate", async message => {
     .slice(1)
     .trim()
     .split(/ +/);
-    if (message.content.startsWith(prefix) == false) {
+  if (message.content.startsWith(prefix) == false) {
     return
   }
-  if (message.content.startsWith(prefix+"eval")) {
+  if (message.content.startsWith(prefix + "eval")) {
     if (
       message.author.id == "742347739018297346" ||
       message.author.id == "894380953718390785"
     ) {
       eeval(message);
     }
-  } else if (message.content.startsWith(prefix+"help")) {
+  } else if (message.content.startsWith(prefix + "help")) {
     if (!args[1]) {
       return message.reply(
         "**__コマンド一覧だぞ__**" +
@@ -193,14 +204,14 @@ client.on("messageCreate", async message => {
 
       let rollids = [];
       const abcdefg = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
-      const emoji=["🇦","🇧","🇨","🇩","🇪","🇫","🇬","🇭","🇮","🇯","🇰","🇱","🇲","🇳","🇴","🇵","🇶","🇷","🇸","🇹","🇺","🇻","🇼","🇽","🇾","🇿"];
+      const emoji = ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮", "🇯", "🇰", "🇱", "🇲", "🇳", "🇴", "🇵", "🇶", "🇷", "🇸", "🇹", "🇺", "🇻", "🇼", "🇽", "🇾", "🇿"];
       for (let i = 2; i < args.length; i++) {
         rollids.push(args[i]);
       }
       rollids.forEach(data => { data.split('<')[0].split('>')[0].split('@')[0] })
       let rollpanel_message = "";
       for (let i = 0; i < rollids.length; i++) {
-        rollpanel_message += ":regional_indicator_"+abcdefg[i] + ': ' + rollids[0] + "\n";
+        rollpanel_message += ":regional_indicator_" + abcdefg[i] + ': ' + rollids[0] + "\n";
       }
       console.log(rollpanel_message);
       const emb = {
@@ -213,13 +224,13 @@ client.on("messageCreate", async message => {
         ]
       }
 
-     const roll_panelmessage=await message.channel.send(emb);
-    
-      for(let i=0;i<rollids.length;i++){
-       roll_panelmessage.react(emoji[i]);
-     }
-     fs.appendFileSync("./rpanel.txt","\n"+roll_panelmessage.id+"|"+roll_panelmessage.channel.id,"utf-8");
-     sousin = true;
+      const roll_panelmessage = await message.channel.send(emb);
+
+      for (let i = 0; i < rollids.length; i++) {
+        roll_panelmessage.react(emoji[i]);
+      }
+      fs.appendFileSync("./rpanel.txt", "\n" + roll_panelmessage.id + "|" + roll_panelmessage.channel.id, "utf-8");
+      sousin = true;
     }
     catch (e) {
       console.log(e);
