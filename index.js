@@ -24,7 +24,7 @@ client.on("ready", message => {
   client.user.setPresence({ game: { name: "with discord.js" } });
   console.log("bot is ready!");
   client.user.setActivity("精神崩壊", { type: "PLAYING" });
- fs.readFileSync("")
+ fs.readFileSync("./rpanel.txt");
 });
 
 client.on('messageReactionAdd', async (clientmessage, user) => {
@@ -32,6 +32,7 @@ client.on('messageReactionAdd', async (clientmessage, user) => {
 })
 
 client.on("messageCreate", async message => {
+  const prefix=process.env.PREFIX;
   let sousin = false;
   if (message.author.id == "742347739018297346") {
     message.react("🤔");
@@ -50,17 +51,17 @@ client.on("messageCreate", async message => {
     .slice(1)
     .trim()
     .split(/ +/);
-    if (message.content.startsWith('*') == false) {
+    if (message.content.startsWith(prefix) == false) {
     return
   }
-  if (message.content.startsWith("*eval")) {
+  if (message.content.startsWith(prefix+"eval")) {
     if (
       message.author.id == "742347739018297346" ||
       message.author.id == "894380953718390785"
     ) {
       eeval(message);
     }
-  } else if (message.content.startsWith("*help")) {
+  } else if (message.content.startsWith(prefix+"help")) {
     if (!args[1]) {
       return message.reply(
         "**__コマンド一覧だぞ__**" +
@@ -225,7 +226,7 @@ client.on("messageCreate", async message => {
     }
   }
 
-  if (sousin == false && message.content.startsWith("*")) {
+  if (sousin == false && message.content.startsWith(prefix)) {
     const options = {
       includeScore: true
     };
