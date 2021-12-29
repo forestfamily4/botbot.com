@@ -27,7 +27,7 @@ helpjson.forEach(data => {
 client.on("ready", message => {
   client.user.setPresence({ game: { name: "with discord.js" } });
   console.log("bot is ready!");
-  client.user.setActivity("精神崩壊", { type: "PLAYING" });
+  client.user.setActivity("精神崩壊 "+process.env.prefix+"help", { type: "PLAYING" });
   const rollpanels = fs.readFileSync("./rpanel.txt", "utf-8").split('\n');
   for (let i = 0; i < rollpanels.length; i++) {
     const roll_panel_id = rollpanels[i].split('|')[0];
@@ -56,7 +56,7 @@ client.on("messageCreate", async message => {
   )
     return;
   if (message.content.match(/<@!898142974704226314>|<@898142974704226314>/)) {
-    return message.reply("\n <@!742347739018297346> こいつに言え");
+    return message.reply("\n <@!742347739018297346> こいつに言え\nちなみに公式サイト botbot.f5.si\nもちろん未完成☆");
   }
   const args = message.content
     .slice(1)
