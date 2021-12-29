@@ -1,0 +1,26 @@
+[
+    {
+      "name": "help",
+      "alt": [],
+      "description": "help [コマンド名]でヘルプ。",
+      "example": "`help`\n`help kanji`"
+    },
+    {
+      "name": "kanji",
+      "alt": ["kj", "kanzi", "kz"],
+      "description": "感じぱずる",
+      "example": "`kanji`"
+    },
+    {
+      "name": "roll_panel",
+      "alt": ["rpanel", "rp"],
+      "description": "ロールパネル\n"
+    },
+    {
+      "name":"clear",
+      "alt":["cl"],
+      "description":"clear 数でその件数削除。",
+      "example":"`clear 10`"
+    }
+  ]
+  
