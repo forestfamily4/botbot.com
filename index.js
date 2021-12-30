@@ -49,12 +49,13 @@ client.on('messageReactionAdd', async (reaction, user) => {
       let num = emoji.indexOf(reaction.emoji.name);
       if (num != -1) {
         const rollmessage = reaction.message.embeds[0].description;
-        const rollid = rollmessage.split('\n')[0].split(' ')[1].slice(3, -1);
-        reaction.message.guild.members.resolve(user.id).roles.add(rollid);
-        const m = await reaction.message.reply("<@" + user.id + ">の<@&" + rollid + ">ロールを追加しました。");
+        const rollid = rollmessage.split('\n')[num].split(' ')[1].slice(3, -1);
+        reaction.message.guild.members.resolve(user.id).roles.add(rollid).catch((e)=>{console.log(e)});
+        const m = await reaction.message.reply("<@" + user.id + ">に<@&" + rollid + ">ロールを追加しました。");
         setTimeout(() => {
           m.delete()
         }, 1000);
+
       }
       else {
         if (reaction.emoji.createdAt == null) {
@@ -82,22 +83,25 @@ client.on('messageReactionRemove', async (reaction, user) => {
       let num = emoji.indexOf(reaction.emoji.name);
       if (num != -1) {
         const rollmessage = reaction.message.embeds[0].description;
-        const rollid = rollmessage.split('\n')[0].split(' ')[1].slice(3, -1);
-        reaction.message.guild.members.resolve(user.id).roles.remove(rollid);
+        const rollid = rollmessage.split('\n')[num].split(' ')[1].slice(3, -1);
+        reaction.message.guild.members.resolve(user.id).roles.remove(rollid).catch((e)=>{console.log(e)});
         const m = await reaction.message.reply("<@" + user.id + ">の<@&" + rollid + ">ロールを削除しました。");
-       setTimeout(() => {
+        setTimeout(() => {
           m.delete()
         }, 1000);
+
       }
-      else {try{
-        if (reaction.emoji.createdAt == null) {
-          
-          reaction.message.reactions.resolve(reaction.emoji.name).users.remove(user);
+      else {
+        try {
+          if (reaction.emoji.createdAt == null) {
+
+            reaction.message.reactions.resolve(reaction.emoji.name).users.remove(user);
+          }
+          else {
+            reaction.message.reactions.resolve(reaction.emoji.id).users.remove(user);
+          }
         }
-        else {
-          reaction.message.reactions.resolve(reaction.emoji.id).users.remove(user);
-        }}
-        catch(e){
+        catch (e) {
           console.log(e);
         }
       }
@@ -265,9 +269,11 @@ client.on("messageCreate", async message => {
     args[0] == "rpanel" ||
     args[0] == "rp"
   ) {
+
     if (message.guild.members.resolve(process.env.BOTID).permissions.has(Permissions.MANAGE_MESSAGES) != true || message.guild.members.resolve(message.author.id).permissions.has(Permissions.MANAGE_MESSAGES) != true) {
       return message.reply("権限がないようです");
     }
+
     try {
 
       let rollids = [];
@@ -276,10 +282,13 @@ client.on("messageCreate", async message => {
       for (let i = 2; i < args.length; i++) {
         rollids.push(args[i]);
       }
-      rollids.forEach(data => { data.split('<')[0].split('>')[0].split('@')[0] })
+      for (let i = 0; i < rollids.length; i++) {
+        rollids[i] = rollids[i].replace(/</g, '').replace(/>/g, '').replace(/@/g, '').replace(/&/g, '')
+      }
+      console.log(rollids);
       let rollpanel_message = "";
       for (let i = 0; i < rollids.length; i++) {
-        rollpanel_message += ":regional_indicator_" + abcdefg[i] + ': ' + rollids[0] + "\n";
+        rollpanel_message += ":regional_indicator_" + abcdefg[i] + ': <@&' + rollids[i] + ">\n";
       }
       const emb = {
         embeds: [
