@@ -1,26 +1,39 @@
 [
-    {
-      "name": "help",
-      "alt": [],
-      "description": "help [コマンド名]でヘルプ。",
-      "example": "`help`\n`help kanji`"
-    },
-    {
-      "name": "kanji",
-      "alt": ["kj", "kanzi", "kz"],
-      "description": "感じぱずる",
-      "example": "`kanji`"
-    },
-    {
-      "name": "roll_panel",
-      "alt": ["rpanel", "rp"],
-      "description": "ロールパネル\n"
-    },
-    {
-      "name":"clear",
-      "alt":["cl"],
-      "description":"clear 数でその件数削除。",
-      "example":"`clear 10`"
-    }
-  ]
-  
+  {
+    "name": "help",
+    "alt": [],
+    "description": "help [コマンド名]でヘルプ。",
+    "example": "`help`\n`help kanji`",
+    "permissions": 0
+  },
+  {
+    "name": "kanji",
+    "alt": [
+      "kj",
+      "kanzi",
+      "kz"
+    ],
+    "description": "感じぱずる",
+    "example": "`kanji`",
+    "permissions": 0
+  },
+  {
+    "name": "roll_panel",
+    "alt": [
+      "rpanel",
+      "rp"
+    ],
+    "description": "ロールパネル\n",
+    "example":"`rp 役職パネル @ロール1 @ロール2`\n`rp 役職パネル ロール1のid ロール2のid`",
+    "permissions": 0
+  },
+  {
+    "name": "clear",
+    "alt": [
+      "cl"
+    ],
+    "description": "clear 数でその件数削除。",
+    "example": "`clear 10`",
+    "permissions": 0
+  }
+]

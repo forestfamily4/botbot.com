@@ -1,18 +1,17 @@
-const http = require("http");
 const Discord = require("discord.js");
+const { Permissions } = require('discord.js');
 const fs = require("fs");
 const Fuse = require("fuse.js");
-const { json } = require("express/lib/response");
-const express=require("express");
+const express = require("express");
 const client = new Discord.Client({
-  intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES]
+  intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES, Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS]
 });
 require('dotenv').config();
 
 const app = express()
 app.listen(8080)
-app.get("/",(req,res)=>{
-	res.sendFile(__dirname + '/views/index.html');
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + '/views/index.html');
 })
 
 
@@ -27,19 +26,85 @@ helpjson.forEach(data => {
 client.on("ready", message => {
   client.user.setPresence({ game: { name: "with discord.js" } });
   console.log("bot is ready!");
-  client.user.setActivity("精神崩壊 "+process.env.prefix+"help", { type: "PLAYING" });
+  client.user.setActivity("精神崩壊 " + process.env.prefix + "help", { type: "PLAYING" });
   const rollpanels = fs.readFileSync("./rpanel.txt", "utf-8").split('\n');
   for (let i = 0; i < rollpanels.length; i++) {
     const roll_panel_id = rollpanels[i].split('|')[0];
     const roll_panel_channel = rollpanels[i].split('|')[1];
-    console.log(client.channels.cache.get(roll_panel_channel).messages.fetch(roll_panel_id));
-    
+    if (roll_panel_id != "") {
+      client.channels.cache.get(roll_panel_channel).messages.fetch(roll_panel_id);
+      client.channels.cache.get('890225582237958194').messages.fetch('926028738590810114');
+    }
   }
 });
 
 client.on('messageReactionAdd', async (reaction, user) => {
-  console.log("????");
-  console.log(JSON.stringify(reaction));
+  if (user.bot) {
+    return
+  }
+  const emoji = ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮", "🇯", "🇰", "🇱", "🇲", "🇳", "🇴", "🇵", "🇶", "🇷", "🇸", "🇹", "🇺", "🇻", "🇼", "🇽", "🇾", "🇿"];
+  const r = fs.readFileSync("./rpanel.txt", "utf-8").split('\n')
+  for (let i = 0; i < r.length; i++) {
+    if (r[i].split('|')[0] == reaction.message.id) {
+      let num = emoji.indexOf(reaction.emoji.name);
+      if (num != -1) {
+        const rollmessage = reaction.message.embeds[0].description;
+        const rollid = rollmessage.split('\n')[0].split(' ')[1].slice(3, -1);
+        reaction.message.guild.members.resolve(user.id).roles.add(rollid);
+        const m = await reaction.message.reply("<@" + user.id + ">の<@&" + rollid + ">ロールを追加しました。");
+        setTimeout(() => {
+          m.delete()
+        }, 1000);
+      }
+      else {
+        if (reaction.emoji.createdAt == null) {
+          reaction.message.reactions.resolve(reaction.emoji.name).users.remove(user);
+        }
+        else {
+          reaction.message.reactions.resolve(reaction.emoji.id).users.remove(user);
+        }
+      }
+    }
+  }
+
+
+})
+
+client.on('messageReactionRemove', async (reaction, user) => {
+  if (user.bot) {
+    return
+  }
+  const abcdefg = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
+  const emoji = ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮", "🇯", "🇰", "🇱", "🇲", "🇳", "🇴", "🇵", "🇶", "🇷", "🇸", "🇹", "🇺", "🇻", "🇼", "🇽", "🇾", "🇿"];
+  const r = fs.readFileSync("./rpanel.txt", "utf-8").split('\n')
+  for (let i = 0; i < r.length; i++) {
+    if (r[i].split('|')[0] == reaction.message.id) {
+      let num = emoji.indexOf(reaction.emoji.name);
+      if (num != -1) {
+        const rollmessage = reaction.message.embeds[0].description;
+        const rollid = rollmessage.split('\n')[0].split(' ')[1].slice(3, -1);
+        reaction.message.guild.members.resolve(user.id).roles.remove(rollid);
+        const m = await reaction.message.reply("<@" + user.id + ">の<@&" + rollid + ">ロールを削除しました。");
+       setTimeout(() => {
+          m.delete()
+        }, 1000);
+      }
+      else {try{
+        if (reaction.emoji.createdAt == null) {
+          
+          reaction.message.reactions.resolve(reaction.emoji.name).users.remove(user);
+        }
+        else {
+          reaction.message.reactions.resolve(reaction.emoji.id).users.remove(user);
+        }}
+        catch(e){
+          console.log(e);
+        }
+      }
+    }
+  }
+
+
 })
 
 client.on("messageCreate", async message => {
@@ -200,6 +265,9 @@ client.on("messageCreate", async message => {
     args[0] == "rpanel" ||
     args[0] == "rp"
   ) {
+    if (message.guild.members.resolve(process.env.BOTID).permissions.has(Permissions.MANAGE_MESSAGES) != true || message.guild.members.resolve(message.author.id).permissions.has(Permissions.MANAGE_MESSAGES) != true) {
+      return message.reply("権限がないようです");
+    }
     try {
 
       let rollids = [];
@@ -213,7 +281,6 @@ client.on("messageCreate", async message => {
       for (let i = 0; i < rollids.length; i++) {
         rollpanel_message += ":regional_indicator_" + abcdefg[i] + ': ' + rollids[0] + "\n";
       }
-      console.log(rollpanel_message);
       const emb = {
         embeds: [
           {
