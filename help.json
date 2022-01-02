@@ -34,5 +34,12 @@
     "description": "clear 数でその件数削除。",
     "example": "`clear 10`",
     "permissions": 0
+  },
+  {
+    "name":"invite",
+    "alt":[],
+    "description":"公式サーバーのURLを表示。",
+    "example":"`invite`",
+    "permissions":0
   }
 ]

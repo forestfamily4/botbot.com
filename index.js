@@ -3,6 +3,7 @@ const { Permissions } = require("discord.js");
 const fs = require("fs");
 const Fuse = require("fuse.js");
 const express = require("express");
+const { get } = require("express/lib/request");
 const client = new Discord.Client({
   intents: [
     Discord.Intents.FLAGS.GUILDS,
@@ -241,7 +242,7 @@ client.on("messageCreate", async message => {
     return;
   if (message.content.match(/<@!898142974704226314>|<@898142974704226314>/)) {
     return message.reply(
-      "\n <@!742347739018297346> こいつに言え\nちなみに公式サイト botbot.f5.si\nもちろん未完成☆"
+      "\n <@!742347739018297346> こいつに言え\nちなみに公式サイト https://botbot.f5.si \nもちろん未完成☆"
     );
   }
   const args = message.content
@@ -344,11 +345,20 @@ client.on("messageCreate", async message => {
         }
       });
     }
-  } else if (args[0] == "kanji" || args[0] == "kanzi") {
+  }
+  else if(args[0]=="invite"){
+    return message.reply({
+      embeds:[{
+        color:getRandomInt(),
+        description:"公式サーバーだよ\nhttps://discord.gg/botbot.com"
+      }]
+    })
+  }
+  else if (args[0] == "kanji" || args[0] == "kanzi") {
     return message.reply({
       embeds: [
         {
-          collor: 334334,
+          color: 334334,
           description:
             "kanjiコマンドだよ　\n タイプ:ゲーム　\n コマンド名:kanji　\n 短縮形:無し　\n 説明 \n 漢字パズルが5問のうちからランダムで出るよ。 \n もちろん未実装☆　\n 使い方 \n 'kannji"
         }
