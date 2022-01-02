@@ -14,6 +14,7 @@ app.get("/", (req, res) => {
   res.sendFile(__dirname + '/views/index.html');
 })
 
+const prefix="\'";
 
 const helpjson = JSON.parse(fs.readFileSync("./help.json", "utf8"));
 const tensai =
@@ -26,7 +27,7 @@ helpjson.forEach(data => {
 client.on("ready", message => {
   client.user.setPresence({ game: { name: "with discord.js" } });
   console.log("bot is ready!");
-  client.user.setActivity("精神崩壊 " + process.env.prefix + "help", { type: "PLAYING" });
+  client.user.setActivity("精神崩壊 " + prefix + "help", { type: "PLAYING" });
   const rollpanels = fs.readFileSync("./rpanel.txt", "utf-8").split('\n');
   for (let i = 0; i < rollpanels.length; i++) {
     const roll_panel_id = rollpanels[i].split('|')[0];
@@ -112,7 +113,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
 })
 
 client.on("messageCreate", async message => {
-  const prefix = process.env.PREFIX;
+  const prefix = prefix;
   let sousin = false;
   if (message.author.id == "742347739018297346") {
     message.react("🤔");
