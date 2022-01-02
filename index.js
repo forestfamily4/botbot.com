@@ -12,7 +12,7 @@ const client = new Discord.Client({
 });
 require("dotenv").config();
 
-const prefix="\'"
+const prefix="*"
 
 const app = express();
 app.listen(8080);
@@ -38,9 +38,8 @@ client.on("ready", message => {
     const roll_panel_id = rollpanels[i].split("|")[0];
     const roll_panel_channel = rollpanels[i].split("|")[1];
     if (roll_panel_id != "") {
-      client.channels.cache
-        .get(roll_panel_channel)
-        .messages.fetch(roll_panel_id);
+      console.log(roll_panel_channel)
+      client.channels.cache.get(roll_panel_channel).messages.fetch(roll_panel_id);
       client.channels.cache
         .get("890225582237958194")
         .messages.fetch("926028738590810114");
@@ -229,7 +228,6 @@ client.on("messageReactionRemove", async (reaction, user) => {
 });
 
 client.on("messageCreate", async message => {
-  const prefix = "'";
   let sousin = false;
   if (message.author.id == "742347739018297346") {
     message.react("🤔");
