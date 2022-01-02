@@ -9,16 +9,15 @@
   {
     "name": "kanji",
     "alt": [
-      "kj",
-      "kanzi",
-      "kz"
+      "kanji",
+      "kanzi"
     ],
-    "description": "感じぱずる",
+    "description": "漢字パズル",
     "example": "`kanji`",
     "permissions": 0
   },
   {
-    "name": "roll_panel",
+    "name": "role_panel",
     "alt": [
       "rpanel",
       "rp"
