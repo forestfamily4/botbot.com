@@ -383,9 +383,7 @@ client.on("messageCreate", async message => {
       const deleteingmessages = message.channel.messages
         .fetch({ limit: num })
         .then(messages => {
-          messages.forEach(async message => {
-            await message.delete();
-          });
+         message.channel.bulkDelete(messages);
         })
         .then(function() {
           message.channel.send(num + "件削除しました。");
