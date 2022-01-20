@@ -13,7 +13,7 @@ const client = new Discord.Client({
 });
 require("dotenv").config();
 
-const prefix="*"
+const prefix=process.env['PREFIX'];
 
 const app = express();
 app.listen(8080);
