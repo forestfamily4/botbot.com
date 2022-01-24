@@ -30,6 +30,26 @@ helpjson.forEach(data => {
   commandarray.push(data.name);
 });
 
+client.on("messageDelete",message=>{
+  let rollpanels1 = fs.readFileSync("./rpanel.txt", "utf-8").split("\n");
+  
+  for (let i = 0; i < rollpanels1.length; i++) {
+    const roll_panel_id = rollpanels1[i].split("|")[0];
+    if(message.id==roll_panel_id){
+      rollpanels1[i]="";
+      let truerollpanels="";
+      rollpanels1.forEach(a=>{
+        if(a!==""){
+        truerollpanels=truerollpanels+a+"\n"
+        }
+    })
+      fs.writeFileSync("./rpanel.txt",truerollpanels,"utf-8");
+    console.log(truerollpanels)
+    console.log(message.id)
+    }
+  }
+})
+
 client.on("ready", message => {
   client.user.setPresence({ game: { name: "with discord.js" } });
   console.log("bot is ready!");
@@ -497,7 +517,7 @@ client.on("messageCreate", async message => {
       }
       fs.appendFileSync(
         "./rpanel.txt",
-        "\n" + roll_panelmessage.id + "|" + roll_panelmessage.channel.id,
+        roll_panelmessage.id + "|" + roll_panelmessage.channel.id+"\n",
         "utf-8"
       );
       sousin = true;
