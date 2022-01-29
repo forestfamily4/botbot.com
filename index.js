@@ -1,19 +1,24 @@
 const Discord = require("discord.js");
 const { Permissions } = require("discord.js");
+const { joinVoiceChannel, entersState, VoiceConnectionStatus, createAudioResource, StreamType, createAudioPlayer, AudioPlayerStatus, NoSubscriberBehavior, generateDependencyReport } = require("@discordjs/voice");
+const DiscordStream = require("@discordjs/voice")
 const fs = require("fs");
 const Fuse = require("fuse.js");
 const express = require("express");
 const { get } = require("express/lib/request");
+const { create } = require("domain");
+const { parse } = require("path/posix");
 const client = new Discord.Client({
   intents: [
     Discord.Intents.FLAGS.GUILDS,
     Discord.Intents.FLAGS.GUILD_MESSAGES,
-    Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS
+    Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+    Discord.Intents.FLAGS.GUILD_VOICE_STATES
   ]
 });
 require("dotenv").config();
 
-const prefix=process.env['PREFIX'];
+const prefix = process.env['PREFIX'];
 
 const app = express();
 app.listen(8080);
@@ -30,22 +35,22 @@ helpjson.forEach(data => {
   commandarray.push(data.name);
 });
 
-client.on("messageDelete",message=>{
+client.on("messageDelete", message => {
   let rollpanels1 = fs.readFileSync("./rpanel.txt", "utf-8").split("\n");
-  
+
   for (let i = 0; i < rollpanels1.length; i++) {
     const roll_panel_id = rollpanels1[i].split("|")[0];
-    if(message.id==roll_panel_id){
-      rollpanels1[i]="";
-      let truerollpanels="";
-      rollpanels1.forEach(a=>{
-        if(a!==""){
-        truerollpanels=truerollpanels+a+"\n"
+    if (message.id == roll_panel_id) {
+      rollpanels1[i] = "";
+      let truerollpanels = "";
+      rollpanels1.forEach(a => {
+        if (a !== "") {
+          truerollpanels = truerollpanels + a + "\n"
         }
-    })
-      fs.writeFileSync("./rpanel.txt",truerollpanels,"utf-8");
-    console.log(truerollpanels)
-    console.log(message.id)
+      })
+      fs.writeFileSync("./rpanel.txt", truerollpanels, "utf-8");
+      console.log(truerollpanels)
+      console.log(message.id)
     }
   }
 })
@@ -108,7 +113,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
         const rollmessage = reaction.message.embeds[0].description;
         const rollid = rollmessage
           .split("\n")
-          [num].split(" ")[1]
+        [num].split(" ")[1]
           .slice(3, -1);
         reaction.message.guild.members
           .resolve(user.id)
@@ -117,12 +122,12 @@ client.on("messageReactionAdd", async (reaction, user) => {
             console.log(e);
           });
         const m = await reaction.message.reply(
-        {
-          embeds:[{
-            title:"成功",
-            description:"<@" + user.id + ">に<@&" + rollid + ">ロールを追加しました。"
-          }]
-        }
+          {
+            embeds: [{
+              title: "成功",
+              description: "<@" + user.id + ">に<@&" + rollid + ">ロールを追加しました。"
+            }]
+          }
         );
         setTimeout(() => {
           m.delete();
@@ -210,7 +215,7 @@ client.on("messageReactionRemove", async (reaction, user) => {
         const rollmessage = reaction.message.embeds[0].description;
         const rollid = rollmessage
           .split("\n")
-          [num].split(" ")[1]
+        [num].split(" ")[1]
           .slice(3, -1);
         reaction.message.guild.members
           .resolve(user.id)
@@ -220,9 +225,9 @@ client.on("messageReactionRemove", async (reaction, user) => {
           });
         const m = await reaction.message.reply(
           {
-            embeds:[{
-              title:"成功",
-              description:"<@" + user.id + ">の<@&" + rollid + ">ロールを削除しました。"
+            embeds: [{
+              title: "成功",
+              description: "<@" + user.id + ">の<@&" + rollid + ">ロールを削除しました。"
             }]
           }
         );
@@ -283,7 +288,7 @@ client.on("messageCreate", async message => {
     if (!args[1]) {
       return message.reply(
         "**__コマンド一覧だぞ__**" +
-          " > **タイプ:ゲーム**　\n kanji think_typing \n > **タイプ:管理**　\n role_control role_pannel kick&ban mute control \n > **タイプ:その他**　\n list \n ネタ系はここにはかいてないよ"
+        " > **タイプ:ゲーム**　\n kanji think_typing \n > **タイプ:管理**　\n role_control role_pannel kick&ban mute control \n > **タイプ:その他**　\n list \n ネタ系はここにはかいてないよ"
       );
       //embed 参考 https://qiita.com/nedew/items/4e0c20c1a89e983a6992
     }
@@ -300,7 +305,7 @@ client.on("messageCreate", async message => {
           embeds: [
             {
               title: data.name,
-              color: getRandomInt(),
+              color: getRandomInt(1,100000),
               fields: [
                 {
                   name: "代替コマンド",
@@ -339,7 +344,7 @@ client.on("messageCreate", async message => {
             embeds: [
               {
                 title: helpjson[i].name,
-                color: getRandomInt(),
+                color: getRandomInt(1,100000),
                 fields: [
                   {
                     name: "代替コマンド",
@@ -366,11 +371,11 @@ client.on("messageCreate", async message => {
       });
     }
   }
-  else if(args[0]=="invite"){
+  else if (args[0] == "invite") {
     return message.reply({
-      embeds:[{
-        color:getRandomInt(),
-        description:"公式サーバーだよ\nhttps://discord.gg/botbot.com"
+      embeds: [{
+        color: getRandomInt(1,100000),
+        description: "公式サーバーだよ\nhttps://discord.gg/botbot.com"
       }]
     })
   }
@@ -403,14 +408,62 @@ client.on("messageCreate", async message => {
       const deleteingmessages = message.channel.messages
         .fetch({ limit: num })
         .then(messages => {
-         message.channel.bulkDelete(messages);
+          message.channel.bulkDelete(messages);
         })
-        .then(function() {
+        .then(function () {
           message.channel.send(num + "件削除しました。");
         });
     }
-    sousin = true;
-  } else if (
+    sousin = true; argsg
+  }
+  else if (args[0] == "leap") {
+    const channel = message.member?.voice.channel;
+    if (channel) {
+      try {
+        let random=false;
+        const min = parseInt(args[1])
+        const max = parseInt(args[2])
+        let num=min;
+        if(args[3]=="random"){random=true}
+        console.log(num+"と"+max)
+        const connection = await connectToChannel(channel);
+        player.play(createAudioResource("leap/start.wav"))
+        connection.subscribe(player);
+       const replymes= await message.reply('Playing now!');
+       if(!message.member.voice.channelId){return}
+        player.on(DiscordStream.AudioPlayerStatus.Idle, () => {
+          if (num > max||!message.member.voice.channelId) {
+           return player.stop()
+          }
+          if(random){num=getRandomInt(min,max+1)
+          }
+          else{num = num + 1;}
+          replymes.edit("単語"+(num)+"番目")
+          if (num.toString().length == 1) {
+            player.play(DiscordStream.createAudioResource("leap/【単語(英→日)】000" + num + ".mp3"))
+          }
+          if (num.toString().length == 2) {
+            player.play(DiscordStream.createAudioResource("leap/【単語(英→日)】00" + num + ".mp3"))
+          }
+          if (num.toString().length == 3) {
+            player.play(DiscordStream.createAudioResource("leap/【単語(英→日)】0" + num + ".mp3"))
+          }
+          if (num.toString().length == 4) {
+            player.play(DiscordStream.createAudioResource("leap/【単語(英→日)】" + num + ".mp3"))
+          }
+          
+        })
+
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      await message.reply('voiceチャンネルはいってないよ');
+    }
+
+    return;
+  }
+  else if (
     args[0] == "role_panel" ||
     args[0] == "rpanel" ||
     args[0] == "rp"
@@ -504,7 +557,7 @@ client.on("messageCreate", async message => {
         embeds: [
           {
             title: args[1],
-            color: getRandomInt(),
+            color: getRandomInt(1,100000),
             description: rollpanel_message
           }
         ]
@@ -517,7 +570,7 @@ client.on("messageCreate", async message => {
       }
       fs.appendFileSync(
         "./rpanel.txt",
-        roll_panelmessage.id + "|" + roll_panelmessage.channel.id+"\n",
+        roll_panelmessage.id + "|" + roll_panelmessage.channel.id + "\n",
         "utf-8"
       );
       sousin = true;
@@ -553,7 +606,7 @@ client.on("messageCreate", async message => {
       embeds: [
         {
           title: "コマンドが見つかりませんでした:thinking:",
-          color: getRandomInt(),
+          color: getRandomInt(1,100000),
           description:
             "わたしの天才的な予想だと" + yosou + "ではないでしょうか？",
           footer: {
@@ -622,10 +675,31 @@ function eeval(message) {
         .catch(() => message.reactions.removeAll());
     });
 }
-function getRandomInt() {
-  let min = 1;
-  let max = 16777215;
+function getRandomInt(min,max) {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
+}
+
+const player = createAudioPlayer({
+  behaviors: {
+    noSubscriber: NoSubscriberBehavior.Play,
+    maxMissedFrames: Math.round(5000 / 20),
+  },
+});
+
+
+async function connectToChannel(channel) {
+  const connection = joinVoiceChannel({
+    channelId: channel.id,
+    guildId: channel.guild.id,
+    adapterCreator: channel.guild.voiceAdapterCreator,
+  });
+  try {
+    await entersState(connection, VoiceConnectionStatus.Ready, 30_000);
+    return connection;
+  } catch (error) {
+    connection.destroy();
+    throw error;
+  }
 }

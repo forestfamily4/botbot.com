@@ -41,5 +41,11 @@
     "description":"公式サーバーのURLを表示。",
     "example":"`invite`",
     "permissions":0
+  },
+  {
+    "name":"leap",
+    "alt":[],
+    "description":"leapを再生",
+    "example":"`leap 1`\n`leap 1 50`\n`leap 1 50 random`"
   }
 ]
