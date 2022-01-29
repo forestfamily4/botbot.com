@@ -425,9 +425,8 @@ client.on("messageCreate", async message => {
         const max = parseInt(args[2])
         let num=min;
         if(args[3]=="random"){random=true}
-        console.log(num+"と"+max)
         const connection = await connectToChannel(channel);
-        player.play(createAudioResource("leap/start.wav"))
+        player.play(createAudioResource("leap/start.mp3"))
         connection.subscribe(player);
        const replymes= await message.reply('Playing now!');
        if(!message.member.voice.channelId){return}
