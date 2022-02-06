@@ -47,5 +47,11 @@
     "alt":[],
     "description":"leapを再生",
     "example":"`leap 1`\n`leap 1 50`\n`leap 1 50 random`"
+  },
+  {
+    "name":"bcm",
+    "alt":[],
+    "description":"にゃんこの音楽が聞ける。idがわからない場合はlist。",
+    "example":"`bcm 3`\n`bcm list`"
   }
 ]

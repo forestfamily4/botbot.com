@@ -3,11 +3,16 @@ const { Permissions } = require("discord.js");
 const { joinVoiceChannel, entersState, VoiceConnectionStatus, createAudioResource, StreamType, createAudioPlayer, AudioPlayerStatus, NoSubscriberBehavior, generateDependencyReport } = require("@discordjs/voice");
 const DiscordStream = require("@discordjs/voice")
 const fs = require("fs");
+const { createReadStream } = require('fs');
 const Fuse = require("fuse.js");
 const express = require("express");
 const { get } = require("express/lib/request");
 const { create } = require("domain");
 const { parse } = require("path/posix");
+const { ConnectionPoolMonitoringEvent } = require("mongodb");
+const { PlayerSubscription } = require("@discordjs/voice");
+const servermusiclist=new Map()
+const playing = new Discord.Collection();
 const client = new Discord.Client({
   intents: [
     Discord.Intents.FLAGS.GUILDS,
@@ -284,12 +289,14 @@ client.on("messageCreate", async message => {
     ) {
       eeval(message);
     }
-  } else if (message.content.startsWith(prefix + "help")) {
+  } else if (args[0] == "help") {
     if (!args[1]) {
-      return message.reply(
-        "**__コマンド一覧だぞ__**" +
-        " > **タイプ:ゲーム**　\n kanji think_typing \n > **タイプ:管理**　\n role_control role_pannel kick&ban mute control \n > **タイプ:その他**　\n list \n ネタ系はここにはかいてないよ"
-      );
+      return message.reply({
+        embeds: [{
+          title: "**__コマンド一覧だぞ__**",
+          fields: [{ name: "a", value: " > **タイプ:ゲーム**　\n kanji think_typing \n > **タイプ:管理**　\n role_control role_pannel kick&ban mute control \n > **タイプ:その他**　\n list \n ネタ系はここにはかいてないよ" }]
+        }]
+      });
       //embed 参考 https://qiita.com/nedew/items/4e0c20c1a89e983a6992
     }
     helpjson.forEach(data => {
@@ -305,7 +312,7 @@ client.on("messageCreate", async message => {
           embeds: [
             {
               title: data.name,
-              color: getRandomInt(1,100000),
+              color: getRandomInt(1, 100000),
               fields: [
                 {
                   name: "代替コマンド",
@@ -344,7 +351,7 @@ client.on("messageCreate", async message => {
             embeds: [
               {
                 title: helpjson[i].name,
-                color: getRandomInt(1,100000),
+                color: getRandomInt(1, 100000),
                 fields: [
                   {
                     name: "代替コマンド",
@@ -374,7 +381,7 @@ client.on("messageCreate", async message => {
   else if (args[0] == "invite") {
     return message.reply({
       embeds: [{
-        color: getRandomInt(1,100000),
+        color: getRandomInt(1, 100000),
         description: "公式サーバーだよ\nhttps://discord.gg/botbot.com"
       }]
     })
@@ -416,28 +423,101 @@ client.on("messageCreate", async message => {
     }
     sousin = true; argsg
   }
+  else if(args[0]=="stop"){
+    player.stop()
+  }
+  else if (args[0] == "bcm") {
+    const num=0;
+    const channel = message.member?.voice.channel;    
+    if (channel) {
+      try {
+        let loop = false;
+        let num=0;
+        let saiseikaisuu=0;
+        if (isNaN(args[1])) {
+          if(args[1].toString()=="list"){
+            return message.reply({embeds:[{
+              title:"リストだよ",
+              name:"a",
+              description:"戦闘中BGM 日本侵略！[3] スロウバトル[30] 民族大移動[31] 大地揺るがす猛者たち[32] なにわの恋人[33] 西表島の戦い[4] チャレンジバトル[6] 神様降臨[34] 道場の間[58] にゃんこ塔50階[125] 未来編 未知なる世界へ[47] 未来の侵略者[48] アポロ決戦[49]  宇宙編 宇宙浪漫飛行[66] 銀河の英雄[67] 奇襲！未確認生物[68] ビッグバン組曲[69] 宇宙の危機！スターフィリバスター[87]  真レジェンドストーリー 太古の力[80] 古代の呪い[81] 驚愕！古代生物[82]  コラボBGM -エヴァコラボ ヤシマ作戦[76] 発進！エヴァンゲリオン[77] 使徒、襲来。[78] 最強の使徒[79] 覚醒！第13号機 [89] -Powerpro Baseball Collab Powerpro Baseball Theme 1 [75] -消滅都市コラボ 失われし世界 (にゃんこ大行進)[62] にゃんこ大行進 Raid Remix～Phase3[122] にゃんこ大行進 Reloaded Remix[123] -ストリートファイターV アーケードエディション vs リュウ[97] vs 春麗[98] vs ガイル[99] vs ザンギエフ[100] vs ブランカ[101] vs ダルシム[102] vs ケン[103] vs 豪鬼[104] -Hatsune Miku Collab Hatsune Miku Collab/Senbonzakura [117] Hatsune Miku Collab/Theo [118] Hatsune Miku Collab/HIBANA [119] Battle Theme #1 Hatsune Miku Collab Version [120] Other Intro theme [0] Start Menu [1] Cat Base [2] Gamatoto [52] Credits [5] Evangelion Collab Cat Base [88] Street Fighter V AE Collab Cat Base [91] Hatsune Miku Collab Cat Base [113] Battle Theme 1 Piano Version(Annihilation City) [121]            "
+            
+            }]})
+          }
+          else{
+            return   message.reply("にゃんこエアプじゃなかったらidぐらいわかるよね^^")
+          }
+        }
+        else {
+          num= parseInt(args[1])
+        }
+        if (args[2] == "loop") {
+          loop = true;
+        }
+        const connection = await connectToChannel(channel);
+        servermusiclist.set(message.guild.id,connection)
+        player.play(createAudioResource("leap/start.mp3"))
+        connection.subscribe(player);
+        const replymes = await message.reply('Playing now!');
+        if (!message.member.voice.channelId) { return }
+        player.on(DiscordStream.AudioPlayerStatus.Idle, () => {
+          if (!message.member.voice.channelId) {
+            return player.stop()
+          }
+          if(!loop&&saiseikaisuu>0){
+            return player.stop()
+          }
+          let resource;
+          if (num.toString().length == 1) {
+            resource = createAudioResource(createReadStream("bcm/00"+num+".ogg", {
+              inputType: StreamType.OggOpus,
+            }));
+          }
+          if (num.toString().length == 2) {
+            resource = createAudioResource(createReadStream("bcm/0"+num+".ogg", {
+              inputType: StreamType.OggOpus,
+            }));
+          }
+          if (num.toString().length == 3) {
+            resource = createAudioResource(createReadStream("bcm/"+num+".ogg", {
+              inputType: StreamType.OggOpus,
+            }));
+          }
+          player.play(resource);
+          saiseikaisuu+=1;
+        })
+
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      await message.reply('voiceチャンネルはいってないよ');
+    }
+
+    return;
+  }
   else if (args[0] == "leap") {
     const channel = message.member?.voice.channel;
     if (channel) {
       try {
-        let random=false;
+        let random = false;
         const min = parseInt(args[1])
         const max = parseInt(args[2])
-        let num=min;
-        if(args[3]=="random"){random=true}
+        let num = min;
+        if (args[3] == "random") { random = true }
         const connection = await connectToChannel(channel);
         player.play(createAudioResource("leap/start.mp3"))
         connection.subscribe(player);
-       const replymes= await message.reply('Playing now!');
-       if(!message.member.voice.channelId){return}
+        const replymes = await message.reply('Playing now!');
+        if (!message.member.voice.channelId) { return }
         player.on(DiscordStream.AudioPlayerStatus.Idle, () => {
-          if (num > max||!message.member.voice.channelId) {
-           return player.stop()
+          if (num > max || !message.member.voice.channelId) {
+            return player.stop()
           }
-          if(random){num=getRandomInt(min,max+1)
+          if (random) {
+            num = getRandomInt(min, max + 1)
           }
-          else{num = num + 1;}
-          replymes.edit("単語"+(num)+"番目")
+          else { num = num + 1; }
+          replymes.edit("単語" + (num) + "番目")
           if (num.toString().length == 1) {
             player.play(DiscordStream.createAudioResource("leap/【単語(英→日)】000" + num + ".mp3"))
           }
@@ -450,7 +530,7 @@ client.on("messageCreate", async message => {
           if (num.toString().length == 4) {
             player.play(DiscordStream.createAudioResource("leap/【単語(英→日)】" + num + ".mp3"))
           }
-          
+
         })
 
       } catch (error) {
@@ -461,6 +541,9 @@ client.on("messageCreate", async message => {
     }
 
     return;
+  }
+  else if (args[0] == "stop") {
+    player.stop()
   }
   else if (
     args[0] == "role_panel" ||
@@ -556,7 +639,7 @@ client.on("messageCreate", async message => {
         embeds: [
           {
             title: args[1],
-            color: getRandomInt(1,100000),
+            color: getRandomInt(1, 100000),
             description: rollpanel_message
           }
         ]
@@ -605,7 +688,7 @@ client.on("messageCreate", async message => {
       embeds: [
         {
           title: "コマンドが見つかりませんでした:thinking:",
-          color: getRandomInt(1,100000),
+          color: getRandomInt(1, 100000),
           description:
             "わたしの天才的な予想だと" + yosou + "ではないでしょうか？",
           footer: {
@@ -674,11 +757,15 @@ function eeval(message) {
         .catch(() => message.reactions.removeAll());
     });
 }
-function getRandomInt(min,max) {
+function getRandomInt(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
 }
+
+client.on("error",(error)=>{
+  console.log(error)
+})
 
 const player = createAudioPlayer({
   behaviors: {
